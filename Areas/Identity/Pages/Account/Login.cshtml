@@ -1,0 +1,86 @@
+﻿@page
+@model LoginModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Login";
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- External Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="~/template/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/template/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body class="auth-page">
+    <section class="auth-section">
+        <aside class="auth-visual auth-visual-login">
+            <a asp-controller="User" asp-action="Profile" class="auth-brand" aria-label="Coza Store home">
+                <img src="~/templatewebsite/images/icons/logo-02.png" alt="Coza Store" />
+            </a>
+            <div class="auth-visual-copy">
+                <span class="auth-visual-kicker">COZA STORE · CURATED FOR YOU</span>
+                <p class="auth-visual-quote">A little more<br />you, every day.</p>
+                <p class="auth-visual-caption">Discover pieces made to feel like they were always yours.</p>
+            </div>
+            <span class="auth-visual-foot">THOUGHTFUL STYLE. EVERYDAY.</span>
+        </aside>
+
+        <main class="auth-panel">
+            <a asp-controller="User" asp-action="Profile" class="auth-back-link">
+                <span aria-hidden="true">&larr;</span> Back to the store
+            </a>
+            <div class="auth-form-wrap">
+                <p class="auth-eyebrow">YOUR ACCOUNT</p>
+                <h1 class="auth-title">Welcome back</h1>
+                <p class="auth-subtitle">Sign in to continue to your account.</p>
+
+                <form method="post" class="login-form">
+                    <div asp-validation-summary="ModelOnly" class="text-danger auth-validation-summary mb-2"></div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Email" class="auth-field-label">Email address</label>
+                        <input asp-for="Input.Email" class="form-control rounded-left" placeholder="you@example.com" autocomplete="email" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.Password" class="auth-field-label">Password</label>
+                        <input asp-for="Input.Password" type="password" class="form-control rounded-left" placeholder="Enter your password" autocomplete="current-password" />
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group auth-submit-group">
+                        <button type="submit" class="btn btn-primary rounded submit p-3 px-5 w-100">
+                            <span>Sign in</span><span class="auth-button-arrow" aria-hidden="true">&rarr;</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="auth-switch">
+                    New here? <a asp-page="./Register">Create an account</a>
+                </div>
+            </div>
+            <p class="auth-legal">A more personal way to shop, right where you left off.</p>
+        </main>
+    </section>
+
+    <!-- Scripts -->
+    <script src="~/template/js/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/template/js/popper.js" asp-append-version="true"></script>
+    <script src="~/template/js/bootstrap.min.js" asp-append-version="true"></script>
+    <script src="~/template/js/main.js" asp-append-version="true"></script>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+</body>
+</html>

@@ -1,0 +1,51 @@
+@model IReadOnlyList<loginlogout.Models.Order>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My orders | Coza Store</title>
+    <link rel="stylesheet" href="~/templatewebsite/vendor/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/storefront.css" asp-append-version="true" />
+</head>
+<body class="bg-light store-commerce-page store-shared-nav">
+    <partial name="_StorefrontNavbar" />
+    <main class="container py-5">
+        <div class="store-commerce-heading"><span>ACCOUNT</span><h1>Your orders</h1><p>Order updates and details, all in one place.</p></div>
+        @if (Model.Count == 0)
+        {
+            <section class="bg-white rounded shadow-sm p-5 text-center">
+                <h2 class="h4 mb-3">No orders yet</h2>
+                <p class="text-muted mb-4">Your order history will appear here after checkout.</p>
+                <a asp-controller="Shop" asp-action="Shop" class="btn btn-dark rounded-pill px-4">Explore the collection</a>
+            </section>
+        }
+        else
+        {
+            <div class="store-orders-list">
+                @foreach (var order in Model)
+                {
+                    <article class="store-order-card">
+                        <div class="store-order-mark" aria-hidden="true"><span>CS</span></div>
+                        <div class="store-order-details">
+                            <span class="store-order-reference">ORDER #@order.OrderId</span>
+                            <h2>Order placed @order.CreatedAt.ToLocalTime().ToString("MMMM d, yyyy")</h2>
+                            <div class="store-order-meta">
+                                <span>@order.Quantity item(s)</span>
+                                <span class="store-order-status">@order.Status</span>
+                            </div>
+                        </div>
+                        <div class="store-order-action">
+                            <strong>@RupeeFormatter.Format(order.Total)</strong>
+                            <a asp-action="Confirmation" asp-route-id="@order.OrderId" class="btn btn-outline-secondary">View order</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </main>
+</body>
+</html>

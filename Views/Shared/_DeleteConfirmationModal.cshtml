@@ -1,0 +1,43 @@
+<div class="modal fade admin-delete-modal" id="deleteConfirmationModal" tabindex="-1"
+     aria-labelledby="deleteConfirmationTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="admin-delete-icon" aria-hidden="true">
+                <i class="bi bi-trash3"></i>
+            </div>
+            <h2 class="modal-title" id="deleteConfirmationTitle">Delete this item?</h2>
+            <p class="admin-delete-message">
+                Are you sure you want to delete this <strong id="deleteItemType">item</strong>?
+                <span id="deleteItemName" class="admin-delete-item-name"></span>
+                This action cannot be undone.
+            </p>
+            <div class="admin-delete-actions">
+                <button type="button" class="btn admin-delete-cancel" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteConfirmationForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <input id="deleteItemId" type="hidden" name="id" value="" />
+                    <button type="submit" class="btn admin-delete-confirm">
+                        <i class="bi bi-trash3" aria-hidden="true"></i> Yes, delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modalElement = document.getElementById("deleteConfirmationModal");
+        if (!modalElement) return;
+
+        modalElement.addEventListener("show.bs.modal", function (event) {
+            const trigger = event.relatedTarget;
+            if (!trigger) return;
+
+            document.getElementById("deleteConfirmationForm").action = trigger.dataset.deleteUrl;
+            document.getElementById("deleteItemId").value = trigger.dataset.deleteId;
+            document.getElementById("deleteItemType").textContent = trigger.dataset.deleteType;
+            document.getElementById("deleteItemName").textContent = trigger.dataset.deleteName;
+        });
+    });
+</script>

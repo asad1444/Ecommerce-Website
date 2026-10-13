@@ -1,0 +1,46 @@
+@model loginlogout.Models.OrderDetailsViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = $"Order #{Model.Order.OrderId}";
+    var statuses = ViewBag.OrderStatuses as string[] ?? Array.Empty<string>();
+}
+
+<section class="admin-page-intro">
+    <div><span class="admin-page-kicker">ORDER DETAILS</span><h1>Order #@Model.Order.OrderId</h1><p>Placed @Model.Order.CreatedAt.ToLocalTime().ToString("MMMM d, yyyy 'at' h:mm tt")</p></div>
+    <div class="d-flex gap-2"><a asp-action="Invoice" asp-route-id="@Model.Order.OrderId" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i> Download invoice PDF</a><a asp-action="Orders" class="admin-primary-link"><i class="bi bi-arrow-left"></i> All orders</a></div>
+</section>
+<div class="row g-4">
+    <div class="col-xl-8">
+        <section class="admin-report-card mb-4">
+            <div class="admin-section-heading"><div><h2>Items</h2><p>Prices are the snapshots recorded when this order was placed.</p></div><span class="admin-order-status" data-status="@Model.Order.Status">@Model.Order.Status</span></div>
+            <div class="admin-table-wrap"><table class="table admin-orders-table"><thead><tr><th>Product</th><th>Unit price</th><th>Qty</th><th>Line total</th></tr></thead><tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr><td><strong>@(item.Product?.Name ?? $"Product #{item.ProductId}")</strong></td><td>@RupeeFormatter.Format(item.Price)</td><td>@item.Quantity</td><td class="admin-order-total">@RupeeFormatter.Format(item.Price * item.Quantity)</td></tr>
+            }
+            </tbody><tfoot><tr><th colspan="3" class="text-end">Order total</th><th>@RupeeFormatter.Format(Model.Order.Total)</th></tr></tfoot></table></div>
+        </section>
+        <section class="admin-report-card">
+            <div class="admin-section-heading"><div><h2>Status timeline</h2><p>Recorded order status changes.</p></div></div>
+            @if (Model.StatusHistory.Count == 0) { <div class="admin-empty-state">No status changes have been recorded yet.</div> }
+            else
+            {
+                <div class="admin-timeline">@foreach (var entry in Model.StatusHistory) { <div class="admin-timeline-item"><span class="admin-status-dot"></span><div><strong>@entry.Status</strong><small>@entry.ChangedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") · @entry.AdminName</small></div></div> }</div>
+            }
+        </section>
+    </div>
+    <div class="col-xl-4">
+        <section class="admin-report-card mb-4">
+            <div class="admin-section-heading"><div><h2>Fulfillment</h2><p>Update this order's progress.</p></div></div>
+            <form asp-action="UpdateOrderStatus" method="post" class="admin-inventory-form">
+                <input type="hidden" name="id" value="@Model.Order.OrderId" />
+                <label for="status">Order status</label><select id="status" name="status" class="form-select mb-3">@foreach (var status in statuses) { <option value="@status" selected="@(string.Equals(status, Model.Order.Status, StringComparison.OrdinalIgnoreCase))">@status</option> }</select>
+                <button type="submit" class="btn btn-admin-update w-100">Save status</button>
+            </form>
+        </section>
+        <section class="admin-report-card">
+            <div class="admin-section-heading"><div><h2>Ship to</h2><p>Customer contact and delivery details</p></div></div>
+            <div class="admin-order-address"><strong>@Model.Order.FirstName @Model.Order.LastName</strong><span>@Model.Order.Email</span><span>@Model.Order.Phone</span><span>@Model.Order.Address</span><span>@Model.Order.City, @Model.Order.PostalCode</span><span>@Model.Order.Country</span></div>
+        </section>
+    </div>
+</div>

@@ -1,0 +1,87 @@
+@model IReadOnlyList<loginlogout.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+<section class="admin-page-intro">
+    <div>
+        <span class="admin-page-kicker">CATALOG</span>
+        <h1>Products</h1>
+        <p>Manage your assortment, stock levels, and product details.</p>
+    </div>
+    <a asp-action="Addproduct" class="admin-primary-link"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add product</a>
+</section>
+
+<section class="admin-list-card">
+    <div class="admin-list-toolbar">
+        <div>
+            <strong>@Model.Count product(s)</strong>
+            <span>Use the search to quickly find an item in your catalog.</span>
+        </div>
+        <form asp-controller="Adminsearch" asp-action="SearchProduct" method="get" class="admin-list-search">
+            <label class="visually-hidden" for="productSearch">Search products</label>
+            <input id="productSearch" type="search" name="name" class="form-control" placeholder="Search products..." />
+            <button type="submit" class="btn btn-admin-update"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+        </form>
+    </div>
+    <div class="admin-table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center py-5 text-muted">No products yet. Add your first product to start building your catalog.</td></tr>
+                }
+                else
+                {
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="admin-product-cell">
+                                    <img src="~/ProductImages/@product.ProductImage" alt="" />
+                                    <span><strong>@product.Name</strong><small>Product #@product.ProductId</small></span>
+                                </div>
+                            </td>
+                            <td>@product.Category?.Name</td>
+                            <td class="admin-order-total">@RupeeFormatter.Format(product.Price)</td>
+                            <td>
+                                @if (product.Stock == 0)
+                                {
+                                    <span class="admin-stock-badge is-empty">Out of stock</span>
+                                }
+                                else if (product.Stock <= 5)
+                                {
+                                    <span class="admin-stock-badge is-low">@product.Stock left</span>
+                                }
+                                else
+                                {
+                                    <span class="admin-stock-badge">@product.Stock available</span>
+                                }
+                            </td>
+                            <td class="text-end text-nowrap">
+                                <a class="admin-action-icon" asp-action="Edit" asp-route-id="@product.ProductId" aria-label="Edit @product.Name"><i class="bi bi-pencil-square"></i></a>
+                                <button type="button" class="admin-action-icon admin-action-delete" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"
+                                        data-delete-url="@Url.Action("DeleteProduct", "Product")" data-delete-id="@product.ProductId"
+                                        data-delete-type="product" data-delete-name="@product.Name" aria-label="Delete @product.Name">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<partial name="_DeleteConfirmationModal" />

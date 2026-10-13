@@ -1,0 +1,156 @@
+﻿@model loginlogout.Models.Order
+
+@{
+    ViewData["Title"] = "EditOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #e7f0fd;
+    }
+
+    .form-container {
+        width: 35vw;
+        margin: 0 auto;
+        position:relative;
+        top:30px;
+        background-color: #fff;
+        padding: 30px 60px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+    }
+
+    h2 {
+        color: #3f51b5;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-align: center;
+        letter-spacing: 1.2px;
+    }
+
+    label {
+        color: #3f51b5;
+        font-weight: 600;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1.5px solid #9fa8da;
+        font-size: 15px;
+        color: #2c387e;
+        background: #f7faff;
+    }
+
+        .form-control:focus {
+            border-color: #3f51b5;
+            box-shadow: 0 0 8px #7986cb44;
+            background: white;
+            color: #1a237e;
+            outline: none;
+        }
+
+    .btn-primary {
+        background-color: #3f51b5;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        width: 100%;
+        letter-spacing: 1px;
+        box-shadow: 0 6px 15px rgba(63, 81, 181, 0.3);
+    }
+
+        .btn-primary:hover {
+            background-color: #303f9f;
+            box-shadow: 0 8px 20px rgba(48, 63, 159, 0.5);
+        }
+
+    .text-danger {
+        font-size: 14px;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        font-weight: 500;
+        color: #3f51b5;
+    }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<div class="form-container">
+    <h2>Edit Order</h2>
+
+    <form asp-action="EditOrder">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="OrderId" />
+
+        <div class="mb-4">
+            <label asp-for="UserId"></label>
+            <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId" readonly></select>
+            <span asp-validation-for="UserId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="LastName"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="Address"></label>
+            <input asp-for="Address" class="form-control" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="City"></label>
+            <input asp-for="City" class="form-control" />
+            <span asp-validation-for="City" class="text-danger"></span>
+        </div>
+
+        <input asp-for="PostalCode" type="hidden" />
+        <input asp-for="Country" type="hidden" />
+        <input asp-for="Phone" type="hidden" />
+        <input asp-for="Name" type="hidden" />
+        <input asp-for="Price" type="hidden" />
+        <input asp-for="Quantity" type="hidden" />
+        <input asp-for="Total" type="hidden" />
+        <input asp-for="CreatedAt" type="hidden" />
+
+        <div class="mb-4">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="Status"></label>
+            <input asp-for="Status" class="form-control" />
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

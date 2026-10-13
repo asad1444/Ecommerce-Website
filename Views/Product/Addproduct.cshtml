@@ -1,0 +1,154 @@
+﻿@model loginlogout.Models.ProductVM
+
+@{
+    ViewData["Title"] = "Add Product";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+
+
+<style>
+    /* Include your same CSS from HTML template */
+    body {
+    font-family: 'Poppins', sans-serif;
+    background: #e7f0fd;
+    }
+
+    .form-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 30px 35px;
+    box-shadow: 0 10px 25px rgba(63, 81, 181, 0.15);
+    border: 1px solid #c3d2fc;
+    }
+
+    h2 {
+    color: #3f51b5;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-align: center;
+    letter-spacing: 1.2px;
+    }
+
+    label {
+    color: #3f51b5;
+    font-weight: 600;
+    }
+
+    .form-control, .form-select {
+    border: 1.5px solid #9fa8da;
+    font-size: 15px;
+    color: #2c387e;
+    background: #f7faff;
+    }
+
+    .form-control:focus, .form-select:focus {
+    border-color: #3f51b5;
+    box-shadow: 0 0 8px #7986cb44;
+    background: white;
+    color: #1a237e;
+    outline: none;
+    }
+
+    .btn-primary {
+    background-color: #3f51b5;
+    border: none;
+    padding: 12px;
+    font-size: 15px;
+    width: 100%;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 15px rgba(63, 81, 181, 0.3);
+    }
+
+    .btn-primary:hover {
+    background-color: #303f9f;
+    box-shadow: 0 8px 20px rgba(48, 63, 159, 0.5);
+    }
+
+    input[type="file"] {
+    padding: 6px 10px;
+    background-color: #f7faff;
+    border-radius: 10px;
+    border: 1.5px solid #9fa8da;
+    color: #3f51b5;
+    }
+
+    input[type="file"]:hover {
+    border-color: #3f51b5;
+    }
+</style>
+
+
+<div class="form-container">
+    <h2>Add New Product</h2>
+    @{
+        @if (TempData["errorproduct"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["errorproduct"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+
+    }
+    <form asp-action="Addproduct" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-4">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" placeholder="Enter Product Name">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="CategoryId" class="form-label"></label>
+            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Category">
+                <option value="">Select category</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+       
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label asp-for="Price" class="form-label"></label>
+                <input asp-for="Price" class="form-control" placeholder="Enter product Price">
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Stock" class="form-label"></label>
+                <input asp-for="Stock" class="form-control" placeholder="Enter stock">
+                <span asp-validation-for="Stock" class="text-danger"></span>
+            </div>
+        </div>
+
+      
+        <div class="mb-4">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" rows="4" class="form-control" style="resize:none;" placeholder="Enter Short Description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="LongDescription" class="form-label"></label>
+            <textarea asp-for="LongDescription" rows="4" class="form-control" style="resize:none;" placeholder="Enter Long Description "></textarea>
+            <span asp-validation-for="LongDescription" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="ProductPhoto" class="form-label"></label>
+            <input asp-for="ProductPhoto" type="file" class="form-control" accept="image/*" />
+            <span asp-validation-for="ProductPhoto" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Add Product</button>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,93 @@
+﻿@model loginlogout.Models.About
+
+@{
+    ViewData["Title"] = "Delete About";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #e7f0fd;
+    }
+
+    .delete-container {
+        max-width: 600px;
+        margin: auto;
+        background: #fff0f0;
+        padding: 35px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(244, 67, 54, 0.1);
+        border: 1px solid #f8c7c7;
+    }
+
+    h2 {
+        color: #e53935;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #c62828;
+    }
+
+    .form-control-plaintext {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .btn-danger {
+        background-color: #e53935;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        color: white;
+        box-shadow: 0 4px 10px rgba(229, 57, 53, 0.3);
+    }
+
+        .btn-danger:hover {
+            background-color: #c62828;
+            box-shadow: 0 6px 15px rgba(198, 40, 40, 0.4);
+        }
+
+    .btn-secondary {
+        background: none;
+        color: #333;
+        text-decoration: underline;
+        margin-left: 15px;
+        font-weight: 600;
+    }
+
+    dl.row {
+        margin-bottom: 25px;
+    }
+</style>
+
+<div class="delete-container">
+    <h2>Delete About</h2>
+
+
+    <dl class="row">
+        <dt class="col-sm-4 form-label">
+            @Html.DisplayNameFor(model => model.UpperImage)
+        </dt>
+        <dd class="col-sm-8 form-control-plaintext">
+            @Html.DisplayFor(model => model.UpperImage)
+        </dd>
+
+        <dt class="col-sm-4 form-label">
+            @Html.DisplayNameFor(model => model.Uppertitle)
+        </dt>
+        <dd class="col-sm-8 form-control-plaintext">
+            @Html.DisplayFor(model => model.Uppertitle)
+        </dd>
+    </dl>
+
+    <form asp-action="DeleteAbout">
+        <input type="hidden" asp-for="AboutId" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+</div>

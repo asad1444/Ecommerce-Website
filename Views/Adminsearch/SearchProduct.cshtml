@@ -1,0 +1,78 @@
+@model IReadOnlyList<loginlogout.Models.Product>
+@{
+    ViewData["Title"] = "Product search";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+    var query = ViewBag.SearchName as string;
+}
+
+<section class="admin-page-intro">
+    <div>
+        <span class="admin-page-kicker">CATALOG SEARCH</span>
+        <h1>Find a product</h1>
+        <p>Search by product name and manage matching catalog entries.</p>
+    </div>
+    <a asp-controller="Product" asp-action="Showproducts" class="admin-primary-link"><i class="bi bi-box-seam" aria-hidden="true"></i> All products</a>
+</section>
+
+<section class="admin-list-card">
+    <form asp-action="SearchProduct" method="get" class="admin-search-page-form">
+        <label for="adminProductQuery">Product name</label>
+        <div class="admin-list-search">
+            <input id="adminProductQuery" type="search" name="name" value="@query" class="form-control" placeholder="e.g. linen shirt" autofocus />
+            <button type="submit" class="btn btn-admin-update"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+            @if (!string.IsNullOrWhiteSpace(query))
+            {
+                <a asp-action="SearchProduct" class="btn btn-outline-secondary">Clear</a>
+            }
+        </div>
+    </form>
+    <div class="admin-search-result-count">
+        @if (string.IsNullOrWhiteSpace(query))
+        {
+            <span>Showing all @Model.Count product(s).</span>
+        }
+        else
+        {
+            <span>@Model.Count match(es) for <strong>“@query”</strong>.</span>
+        }
+    </div>
+    <div class="admin-table-wrap">
+        <table class="table">
+            <thead>
+                <tr><th>Product</th><th>Price</th><th>Stock</th><th class="text-end">Actions</th></tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="4" class="text-center py-5 text-muted">No matching products. Try a shorter or different search.</td></tr>
+                }
+                else
+                {
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="admin-product-cell">
+                                    <img src="~/ProductImages/@product.ProductImage" alt="" />
+                                    <span><strong>@product.Name</strong><small>Product #@product.ProductId</small></span>
+                                </div>
+                            </td>
+                            <td class="admin-order-total">@RupeeFormatter.Format(product.Price)</td>
+                            <td>@product.Stock</td>
+                            <td class="text-end text-nowrap">
+                                <a class="admin-action-icon" asp-controller="Product" asp-action="Edit" asp-route-id="@product.ProductId" aria-label="Edit @product.Name"><i class="bi bi-pencil-square"></i></a>
+                                <button type="button" class="admin-action-icon admin-action-delete" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"
+                                        data-delete-url="@Url.Action("DeleteProduct", "Product")" data-delete-id="@product.ProductId"
+                                        data-delete-type="product" data-delete-name="@product.Name" aria-label="Delete @product.Name">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<partial name="_DeleteConfirmationModal" />

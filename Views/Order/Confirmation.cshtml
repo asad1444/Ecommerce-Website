@@ -1,0 +1,41 @@
+@model loginlogout.Models.Order
+@{
+    var orderItems = ViewBag.OrderItems as List<loginlogout.Models.OrderItem> ?? new();
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Order confirmed | Coza Store</title>
+    <link rel="stylesheet" href="~/templatewebsite/vendor/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/storefront.css" asp-append-version="true" />
+</head>
+<body class="bg-light store-commerce-page store-shared-nav">
+    <partial name="_StorefrontNavbar" />
+    <main class="container py-5">
+        <div class="store-commerce-heading"><span>ORDER COMPLETE</span><h1>Thank you for your order</h1><p>Your confirmation and order summary are below.</p></div>
+        <section class="bg-white rounded shadow-sm p-4 p-md-5 mb-4">
+            <p class="text-success font-weight-bold text-uppercase small">Order placed</p>
+            <h1 class="h2 font-weight-bold">Thank you, @Model.FirstName.</h1>
+            <p class="text-muted mb-1">Your order <strong>#@Model.OrderId</strong> has been received.</p>
+            <p class="text-muted">We will send updates to @Model.Email.</p>
+            <hr />
+            <h2 class="h5 mb-3">Order summary</h2>
+            @foreach (var item in orderItems)
+            {
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span>@item.Product.Name <span class="text-muted">× @item.Quantity</span></span>
+                    <span>@RupeeFormatter.Format(item.Price * item.Quantity)</span>
+                </div>
+            }
+            <div class="d-flex justify-content-between pt-3 font-weight-bold">
+                <span>Total</span>
+                <span>@RupeeFormatter.Format(Model.Total)</span>
+            </div>
+        </section>
+        <a asp-action="MyOrders" class="btn btn-dark rounded-pill px-4">View my orders</a>
+    </main>
+</body>
+</html>

@@ -1,0 +1,56 @@
+@model loginlogout.Models.AdminInventoryViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Inventory";
+}
+
+<section class="admin-page-intro">
+    <div><span class="admin-page-kicker">CATALOG OPERATIONS</span><h1>Inventory</h1><p>Adjust available stock with a recorded reason and admin audit trail.</p></div>
+</section>
+@if (TempData["success"] is string success) { <div class="alert alert-success" role="status">@success</div> }
+@if (TempData["error"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
+
+<section class="admin-report-card mb-4">
+    <div class="admin-section-heading"><div><h2>Stock levels</h2><p>Low stock is highlighted for quick attention.</p></div><span class="admin-section-tag">@Model.Products.Count product(s)</span></div>
+    <div class="admin-table-wrap">
+        <table class="table admin-orders-table">
+            <thead><tr><th>Product</th><th>Current stock</th><th>Adjustment</th><th>Reason</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var product in Model.Products)
+            {
+                <tr>
+                    <td><strong>@product.Name</strong><small class="d-block text-muted">#@product.ProductId</small></td>
+                    <td><span class="admin-stock-pill @(product.Stock == 0 ? "out" : product.Stock <= 5 ? "low" : "healthy")">@(product.Stock == 0 ? "Out of stock" : product.Stock.ToString())</span></td>
+                    <td colspan="3">
+                        <form asp-action="AdjustInventory" method="post" class="admin-stock-adjust-form">
+                            <input type="hidden" name="ProductId" value="@product.ProductId" />
+                            <select name="AdjustmentType" class="form-select form-select-sm" aria-label="Adjustment type for @product.Name"><option value="add">Add</option><option value="remove">Remove</option></select>
+                            <input name="Quantity" type="number" min="1" max="1000000" value="1" class="form-control form-control-sm" aria-label="Quantity for @product.Name" required />
+                            <input name="Reason" type="text" maxlength="200" class="form-control form-control-sm" placeholder="Reason for adjustment" aria-label="Reason for @product.Name" required />
+                            <button type="submit" class="btn btn-sm btn-admin-update">Update</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (Model.Products.Count == 0) { <tr><td colspan="5" class="text-center py-5 text-muted">No products found.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="admin-report-card">
+    <div class="admin-section-heading"><div><h2>Adjustment history</h2><p>Latest 100 recorded stock changes.</p></div></div>
+    <div class="admin-table-wrap"><table class="table admin-orders-table">
+        <thead><tr><th>Changed</th><th>Product</th><th>Change</th><th>Previous</th><th>New stock</th><th>Reason</th><th>Admin</th></tr></thead>
+        <tbody>
+        @if (Model.RecentAdjustments.Count == 0) { <tr><td colspan="7" class="text-center py-5 text-muted">Stock adjustments will appear here.</td></tr> }
+        else
+        {
+            @foreach (var adjustment in Model.RecentAdjustments)
+            {
+                <tr><td>@adjustment.ChangedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td><td><strong>@adjustment.ProductName</strong><small class="d-block text-muted">#@adjustment.ProductId</small></td><td class="@(adjustment.QuantityChange > 0 ? "text-success" : "text-danger") fw-semibold">@(adjustment.QuantityChange > 0 ? "+" : "")@adjustment.QuantityChange</td><td>@adjustment.PreviousStock</td><td>@adjustment.NewStock</td><td>@adjustment.Reason</td><td>@adjustment.AdminName</td></tr>
+            }
+        }
+        </tbody>
+    </table></div>
+</section>

@@ -1,0 +1,125 @@
+@model loginlogout.Models.AdminProfileViewModel
+@{
+    ViewData["Title"] = "My profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var initials = string.Join("", (Model.FullName ?? string.Empty)
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(name => char.ToUpperInvariant(name[0])));
+}
+
+<section class="admin-page-intro">
+    <div>
+        <span class="admin-page-kicker">ACCOUNT SETTINGS</span>
+        <h1>My profile</h1>
+        <p>Manage your personal details and keep your admin account secure.</p>
+    </div>
+</section>
+
+@if (TempData["profileupdated"] is string profileUpdated)
+{
+    <div class="alert alert-success" role="status">@profileUpdated</div>
+}
+@if (TempData["passwordupdated"] is string passwordUpdated)
+{
+    <div class="alert alert-success" role="status">@passwordUpdated</div>
+}
+
+<div class="admin-profile-grid">
+    <section class="admin-profile-card admin-profile-summary">
+        <div class="admin-profile-avatar" aria-hidden="true">@(!string.IsNullOrWhiteSpace(initials) ? initials : "A")</div>
+        <span class="admin-profile-role"><i class="bi bi-shield-check" aria-hidden="true"></i> Store administrator</span>
+        <h2>@Model.FullName</h2>
+        <p>@Model.Email</p>
+        <div class="admin-profile-summary-rule"></div>
+        <a asp-area="Identity" asp-page="/Account/Manage/Email" class="admin-profile-secondary-link">
+            <i class="bi bi-envelope" aria-hidden="true"></i> Manage email address
+            <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+        </a>
+    </section>
+
+    <section class="admin-profile-card">
+        <div class="admin-profile-section-heading">
+            <span class="admin-profile-section-icon"><i class="bi bi-person-lines-fill" aria-hidden="true"></i></span>
+            <div>
+                <h2>Personal information</h2>
+                <p>Update the name and contact number associated with your admin account.</p>
+            </div>
+        </div>
+
+        <form asp-action="UpdateProfile" method="post" class="admin-profile-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" autocomplete="name" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" placeholder="Add a phone number (optional)" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="mb-4">
+                <label class="form-label" for="profileEmail">Email address</label>
+                <input id="profileEmail" class="form-control" value="@Model.Email" disabled />
+                <small class="admin-profile-help">For account security, update your email through the email management page.</small>
+            </div>
+            <button type="submit" class="btn admin-profile-save">
+                <i class="bi bi-check2" aria-hidden="true"></i> Save profile
+            </button>
+        </form>
+    </section>
+
+    <section class="admin-profile-card admin-profile-password">
+        <div class="admin-profile-section-heading">
+            <span class="admin-profile-section-icon is-secure"><i class="bi bi-lock" aria-hidden="true"></i></span>
+            <div>
+                <h2>Change password</h2>
+                <p>Use a strong password you don't use for another account.</p>
+            </div>
+        </div>
+        <form asp-action="ChangePassword" method="post" class="admin-profile-form">
+            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+            <div class="mb-3">
+                <label for="CurrentPassword" class="form-label">Current password</label>
+                <input id="CurrentPassword" name="CurrentPassword" type="password" class="form-control" autocomplete="current-password" required />
+                <span class="text-danger field-validation-valid" data-valmsg-for="CurrentPassword" data-valmsg-replace="true"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="NewPassword" class="form-label">New password</label>
+                    <input id="NewPassword" name="NewPassword" type="password" class="form-control" autocomplete="new-password" minlength="8" maxlength="100" required />
+                    <span class="text-danger field-validation-valid" data-valmsg-for="NewPassword" data-valmsg-replace="true"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="ConfirmPassword" class="form-label">Confirm new password</label>
+                    <input id="ConfirmPassword" name="ConfirmPassword" type="password" class="form-control" autocomplete="new-password" minlength="8" maxlength="100" required />
+                    <span class="text-danger field-validation-valid" data-valmsg-for="ConfirmPassword" data-valmsg-replace="true"></span>
+                </div>
+            </div>
+            <p class="admin-profile-help"><i class="bi bi-info-circle" aria-hidden="true"></i> Passwords must be at least 8 characters and meet your account's password policy.</p>
+            <button type="submit" class="btn admin-profile-save">
+                <i class="bi bi-shield-lock" aria-hidden="true"></i> Update password
+            </button>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById("ConfirmPassword")?.addEventListener("input", function () {
+            this.setCustomValidity(
+                this.value && this.value !== document.getElementById("NewPassword").value
+                    ? "The new passwords do not match."
+                    : "");
+        });
+        document.getElementById("NewPassword")?.addEventListener("input", function () {
+            const confirmation = document.getElementById("ConfirmPassword");
+            if (confirmation && confirmation.value) {
+                confirmation.setCustomValidity(
+                    confirmation.value !== this.value ? "The new passwords do not match." : "");
+            }
+        });
+    </script>
+}

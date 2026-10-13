@@ -1,0 +1,43 @@
+@model loginlogout.Models.AdminOrderFilters
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Orders";
+    var statuses = new[] { "pending", "processing", "shipped", "delivered" };
+}
+
+<section class="admin-page-intro">
+    <div><span class="admin-page-kicker">FULFILLMENT</span><h1>Orders</h1><p>Search customers, filter order status, and review fulfillment.</p></div>
+</section>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="ModelOnly" class="alert alert-warning"></div>
+}
+<section class="admin-report-card mb-4">
+    <form asp-action="Orders" method="get" class="admin-filter-bar">
+        <div class="admin-filter-search"><label asp-for="Search">Order or customer</label><input asp-for="Search" class="form-control" placeholder="Order #, name, or email" /></div>
+        <div><label asp-for="Status">Status</label><select asp-for="Status" class="form-select"><option value="">All statuses</option>@foreach (var status in statuses) { <option value="@status">@status</option> }</select></div>
+        <div><label asp-for="FromDate">From</label><input asp-for="FromDate" type="date" class="form-control" /></div>
+        <div><label asp-for="ToDate">To</label><input asp-for="ToDate" type="date" class="form-control" /></div>
+        <button type="submit" class="btn btn-admin-update">Filter</button>
+        <a asp-action="Orders" class="btn btn-light">Clear</a>
+    </form>
+</section>
+<section class="admin-report-card">
+    <div class="admin-section-heading"><div><h2>Order list</h2><p>Showing up to 500 matching orders.</p></div><span class="admin-section-tag">@Model.Orders.Count order(s)</span></div>
+    <div class="admin-table-wrap">
+        <table class="table admin-orders-table">
+            <thead><tr><th>Order</th><th>Customer</th><th>Placed</th><th>Qty</th><th>Total</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            @if (Model.Orders.Count == 0) { <tr><td colspan="7" class="text-center py-5 text-muted">No matching orders found.</td></tr> }
+            else
+            {
+                @foreach (var order in Model.Orders)
+                {
+                    <tr><td><a asp-action="OrderDetails" asp-route-id="@order.OrderId" class="admin-order-id">#@order.OrderId</a></td><td><strong>@order.FirstName @order.LastName</strong><small class="d-block text-muted">@order.Email</small></td><td>@order.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td><td>@order.Quantity</td><td class="admin-order-total">@RupeeFormatter.Format(order.Total)</td><td><span class="admin-order-status" data-status="@order.Status">@order.Status</span></td><td><a asp-action="OrderDetails" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-secondary">View order</a></td></tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+</section>

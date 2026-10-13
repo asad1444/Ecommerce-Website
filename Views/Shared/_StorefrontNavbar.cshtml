@@ -1,0 +1,51 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var activeTab = currentController switch
+    {
+        "User" when currentAction == "ByCategory" => "Shop",
+        "User" => "Home",
+        "Shop" or "Productdetail" => "Shop",
+        "Wishlist" => "Wishlist",
+        "Order" when currentAction == "MyOrders" || currentAction == "Confirmation" => "Orders",
+        "Pages" => "About",
+        "Contact" => "Contact",
+        _ => string.Empty
+    };
+}
+<header class="store-site-header">
+    <div class="store-site-header-inner">
+        <a asp-controller="User" asp-action="Profile" class="store-site-brand" aria-label="Coza Store home">
+            <span>COZA</span><small>STORE</small>
+        </a>
+        <nav class="store-site-links" aria-label="Main navigation">
+            <a asp-controller="User" asp-action="Profile" class="@(activeTab == "Home" ? "active" : "")">Home</a>
+            <a asp-controller="Shop" asp-action="Shop" class="@(activeTab == "Shop" ? "active" : "")">Shop</a>
+            <a asp-controller="Wishlist" asp-action="Index" class="@(activeTab == "Wishlist" ? "active" : "")">Wishlist</a>
+            <a asp-controller="Order" asp-action="MyOrders" class="@(activeTab == "Orders" ? "active" : "")">Orders</a>
+            <a asp-controller="Pages" asp-action="WebAbout" class="@(activeTab == "About" ? "active" : "")">About</a>
+            <a asp-controller="Contact" asp-action="Contact" class="@(activeTab == "Contact" ? "active" : "")">Contact</a>
+        </nav>
+        <div class="store-site-actions">
+            <a asp-controller="ShowCartItem" asp-action="ShowCartItem" class="store-site-cart" aria-label="View shopping cart">
+                <span>Cart</span>
+                @if (ViewBag.CountCartitem is int count && count > 0)
+                {
+                    <b>@count</b>
+                }
+                else if (ViewBag.Cartcount is int homeCount && homeCount > 0)
+                {
+                    <b>@homeCount</b>
+                }
+            </a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="User" asp-action="Profile" class="store-site-account">Account</a>
+            }
+            else
+            {
+                <a asp-area="Identity" asp-page="/Account/Login" class="store-site-account">Sign in</a>
+            }
+        </div>
+    </div>
+</header>

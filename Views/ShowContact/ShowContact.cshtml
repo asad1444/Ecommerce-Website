@@ -1,0 +1,48 @@
+@model IReadOnlyList<loginlogout.Models.Contact>
+@{
+    ViewData["Title"] = "Messages";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+<section class="admin-page-intro">
+    <div>
+        <span class="admin-page-kicker">CUSTOMER CARE</span>
+        <h1>Store messages</h1>
+        <p>Read incoming questions and reply directly to customers.</p>
+    </div>
+</section>
+
+<section class="admin-list-card">
+    <div class="admin-list-toolbar">
+        <div><strong>@Model.Count message(s)</strong><span>Newest submissions are shown first.</span></div>
+    </div>
+    <div class="admin-table-wrap">
+        <table class="table">
+            <thead><tr><th>From</th><th>Message</th><th>Received</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="4" class="text-center py-5 text-muted">No messages yet. Customer enquiries will appear here.</td></tr>
+                }
+                else
+                {
+                    @foreach (var contact in Model)
+                    {
+                        <tr>
+                            <td><a class="admin-contact-email" href="mailto:@contact.Email">@contact.Email</a></td>
+                            <td class="admin-message-cell">@contact.Message</td>
+                            <td class="text-nowrap">@contact.SubmittedAt.ToLocalTime().ToString("MMM d, yyyy · h:mm tt")</td>
+                            <td class="text-end text-nowrap">
+                                <a class="admin-action-icon" href="mailto:@contact.Email" aria-label="Reply to @contact.Email"><i class="bi bi-reply"></i></a>
+                                <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this message?');">
+                                    <input type="hidden" name="id" value="@contact.ContactId" />
+                                    <button type="submit" class="admin-action-icon admin-action-delete" aria-label="Delete message from @contact.Email"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

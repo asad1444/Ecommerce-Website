@@ -1,0 +1,108 @@
+﻿@model loginlogout.Models.Product
+
+@{
+    ViewData["Title"] = "Delete Product";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #e7f0fd;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        background: #f0f5ff;
+        padding: 30px 35px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(63, 81, 181, 0.15);
+        border: 1px solid #c3d2fc;
+    }
+
+    h2 {
+        color: #3f51b5;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-align: center;
+        letter-spacing: 1.2px;
+    }
+
+    label {
+        color: #3f51b5;
+        font-weight: 600;
+    }
+
+    .form-control {
+        background: #f7faff;
+        border: 1.5px solid #9fa8da;
+        border-radius: 10px;
+        color: #2c387e;
+        font-size: 15px;
+    }
+
+    .btn-danger {
+        background-color: #f44336;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        width: 100%;
+        letter-spacing: 1px;
+        box-shadow: 0 6px 15px rgba(244, 67, 54, 0.3);
+    }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+            box-shadow: 0 8px 20px rgba(211, 47, 47, 0.5);
+        }
+
+    .readonly-label {
+        font-weight: 600;
+        color: #3f51b5;
+    }
+
+    .readonly-value {
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f7faff;
+        border-radius: 10px;
+        border: 1.5px solid #9fa8da;
+        color: #2c387e;
+    }
+</style>
+
+<div class="form-container">
+    <h2>Confirm Delete</h2>
+
+    <form asp-action="DeleteProduct" method="post">
+        <input type="hidden" asp-for="ProductId" />
+
+        <div>
+            <label class="readonly-label">Name</label>
+            <div class="readonly-value">@Model.Name</div>
+
+            <label class="readonly-label">Description</label>
+            <div class="readonly-value">@Model.Description</div>
+
+            <label class="readonly-label">Price</label>
+            <div class="readonly-value">@RupeeFormatter.Format(Model.Price)</div>
+
+            <label class="readonly-label">Stock</label>
+            <div class="readonly-value">@Model.Stock</div>
+
+            <label class="readonly-label">Category ID</label>
+            <div class="readonly-value">@Model.Category?.CategoryId</div>
+
+            <label class="readonly-label">Long Description</label>
+            <div class="readonly-value">@Model.LongDescription</div>
+
+            <label class="readonly-label">Image</label>
+            <div class="readonly-value">@Model.ProductImage</div>
+        </div>
+
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+</div>

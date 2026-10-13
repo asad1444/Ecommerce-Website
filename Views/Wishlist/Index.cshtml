@@ -1,0 +1,79 @@
+@model IReadOnlyList<loginlogout.Models.WishlistItem>
+@{
+    ViewData["Title"] = "Wishlist";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wishlist | Coza Store</title>
+    <link rel="stylesheet" href="~/templatewebsite/vendor/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/storefront.css" asp-append-version="true" />
+</head>
+<body class="bg-light store-commerce-page store-shared-nav">
+    <partial name="_StorefrontNavbar" />
+
+    <main class="container py-5">
+        <div class="store-commerce-heading">
+            <span>SAVED FOR LATER</span>
+            <h1>Your wishlist</h1>
+            <p>Keep the pieces you love close at hand.</p>
+        </div>
+
+        @if (TempData["StoreMessage"] is string message)
+        {
+            <div class="alert alert-success" role="status">@message</div>
+        }
+        @if (TempData["StoreError"] is string error)
+        {
+            <div class="alert alert-danger" role="alert">@error</div>
+        }
+
+        @if (Model.Count == 0)
+        {
+            <section class="bg-white rounded shadow-sm p-5 text-center">
+                <h2 class="h4 mb-3">Nothing saved just yet</h2>
+                <p class="text-muted mb-4">Save pieces you love and come back to them anytime.</p>
+                <a asp-controller="Shop" asp-action="Shop" class="btn btn-dark rounded-pill px-4">Explore the collection</a>
+            </section>
+        }
+        else
+        {
+            <div class="row store-wishlist-grid">
+                @foreach (var item in Model)
+                {
+                    <article class="col-12 col-sm-6 col-lg-4 mb-4">
+                        <div class="bg-white rounded shadow-sm h-100 overflow-hidden store-wishlist-card">
+                            <a asp-controller="Productdetail" asp-action="Productdetail" asp-route-id="@item.ProductId" class="store-wishlist-image">
+                                <img src="~/ProductImages/@item.Product.ProductImage" alt="@item.Product.Name" />
+                                <span class="store-wishlist-label">SAVED ITEM</span>
+                            </a>
+                            <div class="p-4">
+                                <div class="store-wishlist-product-heading">
+                                    <h2>@item.Product.Name</h2>
+                                    <strong>@RupeeFormatter.Format(item.Product.Price)</strong>
+                                </div>
+                                @if (item.Product.Stock > 0)
+                                {
+                                    <p class="store-wishlist-stock">In stock</p>
+                                    <a asp-controller="Productdetail" asp-action="Productdetail" asp-route-id="@item.ProductId" class="btn btn-dark btn-block store-wishlist-add">Shop Now</a>
+                                }
+                                else
+                                {
+                                    <p class="store-wishlist-stock store-wishlist-out">Currently out of stock</p>
+                                }
+                                <form asp-action="Remove" method="post" class="store-wishlist-remove">
+                                    <input type="hidden" name="id" value="@item.WishlistItemId" />
+                                    <button class="btn btn-link px-0" type="submit">Remove from wishlist</button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </main>
+</body>
+</html>

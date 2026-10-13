@@ -1,0 +1,135 @@
+﻿@model loginlogout.Models.AboutVM
+
+@{
+    ViewData["Title"] = "Edit About";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #e7f0fd;
+    }
+
+    .form-container {
+        max-width: 650px;
+        margin: auto;
+        background: #f0f5ff;
+        padding: 30px 35px;
+        box-shadow: 0 10px 25px rgba(63, 81, 181, 0.15);
+        border: 1px solid #c3d2fc;
+    }
+
+    h2 {
+        color: #3f51b5;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-align: center;
+        letter-spacing: 1.2px;
+    }
+
+    label {
+        color: #3f51b5;
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control {
+        border: 1.5px solid #9fa8da;
+        font-size: 15px;
+        color: #2c387e;
+        background: #f7faff;
+        padding: 10px;
+    }
+
+        .form-control:focus {
+            border-color: #3f51b5;
+            box-shadow: 0 0 8px #7986cb44;
+            background: white;
+            color: #1a237e;
+        }
+
+    .btn-primary {
+        background-color: #3f51b5;
+        border: none;
+        padding: 12px;
+        font-size: 15px;
+        width: 100%;
+        letter-spacing: 1px;
+        box-shadow: 0 6px 15px rgba(63, 81, 181, 0.3);
+    }
+
+        .btn-primary:hover {
+            background-color: #303f9f;
+            box-shadow: 0 8px 20px rgba(48, 63, 159, 0.5);
+        }
+
+    input[type="file"] {
+        padding: 8px;
+        background-color: #f7faff;
+        border: 1.5px solid #9fa8da;
+        color: #3f51b5;
+    }
+
+    img.preview-img {
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-height: 100px;
+    }
+
+    .back-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .text-danger {
+        font-size: 14px;
+    }
+</style>
+
+<div class="form-container">
+    <h2>Edit About</h2>
+
+    <form asp-action="EditAbout" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="AboutId" />
+
+        @if (!string.IsNullOrEmpty(ViewBag.BannerImage))
+        {
+            <label>Current Banner Image</label>
+            <div class="text-center mb-3">
+                <img src="~/AboutImages/@ViewBag.BannerImage" class="preview-img" />
+            </div>
+        }
+
+        <div class="mb-4">
+            <label asp-for="UpperPhoto"></label>
+            <input asp-for="UpperPhoto" type="file" class="form-control" />
+            <span asp-validation-for="UpperPhoto" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="Uppertitle"></label>
+            <input asp-for="Uppertitle" class="form-control" placeholder="Enter Title" />
+            <span asp-validation-for="Uppertitle" class="text-danger"></span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ViewBag.AboutImage))
+        {
+            <label>Current About Image</label>
+            <div class="text-center mb-4">
+                <img src="~/AboutImages/@ViewBag.AboutImage" class="preview-img" />
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+
+   
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

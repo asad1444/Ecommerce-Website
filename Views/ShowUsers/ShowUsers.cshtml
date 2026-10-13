@@ -1,0 +1,89 @@
+﻿@model List<loginlogout.Areas.Identity.Data.ApplicationUser>
+@{
+	Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+
+
+<style>
+    body {
+        background-color: #e3f2fd;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .user-table-container {
+        width: 100%;
+        margin: auto;
+        background-color: #f5faff;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(63, 81, 181, 0.3);
+        padding: 30px;
+    }
+
+
+    .user-table h2 {
+        text-align: center;
+        color: #3f51b5;
+        margin-bottom: 25px;
+    }
+
+    .table thead {
+        background-color: #3f51b5;
+        color: white;
+    }
+
+    .table tbody tr:hover {
+        background-color: #e8f0ff;
+    }
+
+    .btn-indigo {
+        background-color: #3f51b5;
+        color: white;
+    }
+
+        .btn-indigo:hover {
+            background-color: #303f9f;
+        }
+
+    .btn-danger {
+        background-color: #e53935;
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+</style>
+
+<div class="user-table-container">
+    <div class="user-table">
+        <h2>Show Users</h2>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.FullName</td>
+                            <td>@item.Email</td>
+                            <td>
+                                <form asp-action="Remove" method="post" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

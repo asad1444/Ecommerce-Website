@@ -1,0 +1,64 @@
+﻿<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<!-- jQuery & Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+
+	@if(TempData["productadd"] != null)
+	{
+		@:toastr.success("@TempData["productadd"]");
+
+	}
+	@if (TempData["productupdate"] != null)
+	{
+		@:toastr.success("@TempData["productupdate"]");
+
+	}
+	@if (TempData["Removeproduct"] != null)
+	{
+		@:toastr.success("@TempData["Removeproduct"]");
+
+	}
+	@if(TempData["addcategory"] != null)
+	{
+		@:toastr.success("@TempData["addcategory"]");
+	}
+
+	@if (TempData["updatecategory"] != null)
+	{
+		@:toastr.success("@TempData["updatecategory"]");
+	}
+
+	@if (TempData["removecategory"] != null)
+	{
+		@:toastr.success("@TempData["removecategory"]");
+	}
+
+	@if (TempData["deleteuser"] != null)
+	{
+		@:toastr.success("@TempData["deleteuser"]");
+	}
+	@if (TempData["categoryerror"] != null)
+	{
+		@:toastr.error("@TempData["categoryerror"]");
+	}
+	@if (TempData["producterror"] != null)
+	{
+		@:toastr.error("@TempData["producterror"]");
+	}
+	@if (TempData["deletecontact"] != null)
+	{
+		@:toastr.success("@TempData["deletecontact"]");
+	}
+	@if (TempData["profileupdated"] != null)
+	{
+		@:toastr.success("@TempData["profileupdated"]");
+	}
+	@if (TempData["passwordupdated"] != null)
+	{
+		@:toastr.success("@TempData["passwordupdated"]");
+	}
+
+</script>

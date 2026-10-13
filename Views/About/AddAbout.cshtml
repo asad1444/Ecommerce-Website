@@ -1,0 +1,113 @@
+﻿@model loginlogout.Models.AboutVM
+
+@{
+    ViewData["Title"] = "Add About";
+    Layout = "~/Views/Shared/_Layoutcrud.cshtml";
+}
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #e7f0fd;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        background: #f0f5ff;
+        padding: 30px 35px;
+        box-shadow: 0 10px 25px rgba(63, 81, 181, 0.15);
+        border: 1px solid #c3d2fc;
+    }
+
+    h2 {
+        color: #3f51b5;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-align: center;
+        letter-spacing: 1.2px;
+    }
+
+    label {
+        color: #3f51b5;
+        font-weight: 600;
+    }
+
+    .form-control {
+        border: 1.5px solid #9fa8da;
+        font-size: 15px;
+        color: #2c387e;
+        background: #f7faff;
+    }
+
+        .form-control:focus {
+            border-color: #3f51b5;
+            box-shadow: 0 0 8px #7986cb44;
+            background: white;
+            color: #1a237e;
+            outline: none;
+        }
+
+    .btn-primary {
+        background-color: #3f51b5;
+        border: none;
+        padding: 12px;
+        font-weight: 700;
+        font-size: 15px;
+        width: 100%;
+        letter-spacing: 1px;
+        box-shadow: 0 6px 15px rgba(63, 81, 181, 0.3);
+    }
+
+        .btn-primary:hover {
+            background-color: #303f9f;
+            box-shadow: 0 8px 20px rgba(48, 63, 159, 0.5);
+        }
+
+    input[type="file"] {
+        padding: 6px 10px;
+        background-color: #f7faff;
+        border: 1.5px solid #9fa8da;
+        color: #3f51b5;
+    }
+
+        input[type="file"]:hover {
+            border-color: #3f51b5;
+        }
+</style>
+
+<div class="form-container">
+    <h2>Add About Section</h2>
+
+    <form asp-action="AddAbout" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-4">
+            <label asp-for="UpperPhoto" class="form-label"></label>
+            <input asp-for="UpperPhoto" type="file" class="form-control" accept="image/*" />
+            <span asp-validation-for="UpperPhoto" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="Uppertitle" class="form-label"></label>
+            <input asp-for="Uppertitle" class="form-control" placeholder="Enter upper title" />
+            <span asp-validation-for="Uppertitle" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="uppercontent" class="form-label"></label>
+            <input asp-for="uppercontent" class="form-control" placeholder="Enter upper content" />
+            <span asp-validation-for="uppercontent" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-action="Index" class="text-decoration-none text-primary">← Back to List</a>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

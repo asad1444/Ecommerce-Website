@@ -1,0 +1,142 @@
+@model loginlogout.Models.AdminDashboardViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Dashboard";
+    var statuses = ViewBag.OrderStatuses as string[] ?? Array.Empty<string>();
+    var maxRevenue = Math.Max(Model.SalesTrend.Select(day => day.Revenue).DefaultIfEmpty().Max(), 1m);
+}
+
+<section class="admin-page-intro">
+    <div>
+        <span class="admin-page-kicker">STORE OVERVIEW</span>
+        <h1>Good to see you.</h1>
+        <p>Sales performance and fulfillment activity for your store.</p>
+    </div>
+    <a asp-controller="Product" asp-action="Addproduct" class="admin-primary-link">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i> Add product
+    </a>
+</section>
+
+@if (TempData["success"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+<section class="admin-dashboard" aria-label="Store metrics">
+    <div class="row g-3">
+        <div class="col-sm-6 col-xl-3"><article class="card-summary"><span class="admin-metric-icon"><i class="bi bi-people"></i></span><h5>Customers</h5><h3>@Model.TotalCustomers</h3><p class="admin-metric-caption">Registered shopper accounts</p></article></div>
+        <div class="col-sm-6 col-xl-3"><article class="card-summary"><span class="admin-metric-icon"><i class="bi bi-bag-check"></i></span><h5>Orders in period</h5><h3>@Model.TotalOrders</h3><p class="admin-metric-caption">@Model.FromDate.ToString("MMM d") – @Model.ToDate.ToString("MMM d, yyyy")</p></article></div>
+        <div class="col-sm-6 col-xl-3"><article class="card-summary"><span class="admin-metric-icon"><i class="bi bi-hourglass-split"></i></span><h5>Awaiting action</h5><h3>@Model.PendingOrders</h3><p class="admin-metric-caption">Pending orders in selected period</p></article></div>
+        <div class="col-sm-6 col-xl-3"><article class="card-summary"><span class="admin-metric-icon"><i class="bi bi-currency-rupee"></i></span><h5>Revenue in period</h5><h3>@RupeeFormatter.Format(Model.Revenue)</h3><p class="admin-metric-caption">Recorded order totals</p></article></div>
+    </div>
+</section>
+
+<div class="row g-4 mt-1">
+    <div class="col-xl-8">
+        <section class="admin-report-card">
+            <div class="admin-section-heading">
+                <div><h2>Sales trend</h2><p>@(Model.Period == "daily" ? "Hourly revenue today" : Model.Period == "yearly" ? "Monthly revenue for the last 12 months" : "Daily revenue for the last 7 days")</p></div>
+                <form asp-action="Dashboard" method="get" class="admin-chart-period-form">
+                    <label for="salesPeriod">View</label>
+                    <select id="salesPeriod" name="period" class="form-select" onchange="this.form.submit()">
+                        <option value="weekly" selected="@(Model.Period == "weekly")">Weekly</option>
+                        <option value="daily" selected="@(Model.Period == "daily")">Daily</option>
+                        <option value="yearly" selected="@(Model.Period == "yearly")">Yearly</option>
+                    </select>
+                </form>
+            </div>
+            @if (Model.SalesTrend.Any(day => day.Revenue > 0))
+            {
+                <div class="admin-sales-chart" role="img" aria-label="@Model.Period sales revenue bar chart">
+                    @foreach (var day in Model.SalesTrend)
+                    {
+                        var height = Math.Max((double)(day.Revenue / maxRevenue * 100m), day.Revenue > 0 ? 5 : 2);
+                        <div class="admin-sales-day" title="@day.Date.ToString(Model.Period == "daily" ? "MMM d, h tt" : "MMM d, yyyy"): @RupeeFormatter.Format(day.Revenue) / @day.Orders orders">
+                            <span class="admin-sales-bar" style="height:@(height.ToString("0"))%"></span>
+                            <small>@day.Label</small>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="admin-empty-state">No sales were recorded for these dates.</div>
+            }
+        </section>
+    </div>
+    <div class="col-xl-4">
+        <section class="admin-report-card h-100">
+            <div class="admin-section-heading"><div><h2>Top sellers</h2><p>By units sold in this period</p></div></div>
+            @if (Model.TopProducts.Count == 0)
+            {
+                <div class="admin-empty-state">Product sales will appear here.</div>
+            }
+            else
+            {
+                <div class="admin-top-products">
+                    @foreach (var item in Model.TopProducts)
+                    {
+                        <div class="admin-top-product"><div><strong>@item.Name</strong><small>@item.UnitsSold units sold</small></div><span>@RupeeFormatter.Format(item.Revenue)</span></div>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+</div>
+
+<section id="recent-orders" class="admin-orders-section">
+    <div class="card">
+        <div class="card-body">
+            <div class="admin-section-heading">
+                <div><h2 class="card-title">Recent orders</h2><p>Open an order to view fulfillment, history, and invoice.</p></div>
+                <a asp-action="Orders" class="admin-section-tag text-decoration-none"><i class="bi bi-receipt"></i> All orders</a>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="table admin-orders-table">
+                    <thead><tr><th>Order</th><th>Customer</th><th>Placed</th><th>Items</th><th>Total</th><th>Status</th><th>Update status</th></tr></thead>
+                    <tbody>
+                    @if (Model.RecentOrders.Count == 0)
+                    {
+                        <tr><td colspan="7" class="text-center py-5 text-muted">No orders yet. New orders will show here.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            <tr>
+                                <td><a asp-action="OrderDetails" asp-route-id="@order.OrderId" class="admin-order-id">#@order.OrderId</a></td>
+                                <td><strong>@order.FirstName @order.LastName</strong><small class="d-block text-muted">@order.Email</small></td>
+                                <td>@order.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                <td>@order.Quantity</td>
+                                <td class="admin-order-total">@RupeeFormatter.Format(order.Total)</td>
+                                <td><span class="admin-order-status" data-status="@order.Status">@order.Status</span></td>
+                                <td>
+                                    <form asp-action="UpdateOrderStatus" method="post" class="admin-status-form">
+                                        <input type="hidden" name="id" value="@order.OrderId" />
+                                        <select name="status" class="form-select form-select-sm" aria-label="Update status for order @order.OrderId">
+                                            @foreach (var status in statuses) { <option value="@status" selected="@(string.Equals(status, order.Status, StringComparison.OrdinalIgnoreCase))">@status</option> }
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-admin-update">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="admin-dashboard-shortcuts">
+    <div class="admin-shortcut">
+        <span><i class="bi bi-box-seam"></i></span>
+        <div><strong>Inventory attention</strong><small>@Model.LowStockProducts product(s) are out of stock or have five or fewer units.</small></div>
+        <a asp-action="Inventory">Manage inventory <i class="bi bi-arrow-right"></i></a>
+    </div>
+</section>
