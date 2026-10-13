@@ -1,6 +1,0 @@
-bin/
-obj/
-.git/
-ecommerce.db
-ecommerce.db-shm
-ecommerce.db-wal

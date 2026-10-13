@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("loginlogout")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+45888e6a728fef3a6fe97d8469420eef2061f524")]
 [assembly: System.Reflection.AssemblyProductAttribute("loginlogout")]
 [assembly: System.Reflection.AssemblyTitleAttribute("loginlogout")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

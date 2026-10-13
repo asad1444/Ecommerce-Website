@@ -12,6 +12,12 @@ services:
         value: "10000"
       - key: ConnectionStrings__DefaultConnection
         value: Data Source=/var/data/ecommerce.db
+      - key: Admin__Email
+        sync: false
+      - key: Admin__Password
+        sync: false
+      - key: Admin__FullName
+        value: Store Administrator
     disk:
       name: ecommerce-data
       mountPath: /var/data

@@ -1,8 +1,16 @@
 ﻿using loginlogout.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -32,6 +40,8 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -39,33 +49,57 @@ using (var scope = app.Services.CreateScope())
     await dbContext.Database.MigrateAsync();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var logger = services.GetRequiredService<ILogger<Program>>();
 
     var roles = new[] { "Admin", "User" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            var roleResult = await roleManager.CreateAsync(new IdentityRole(role));
+            if (!roleResult.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Could not create the {role} role: {string.Join("; ", roleResult.Errors.Select(error => error.Description))}");
+            }
         }
     }
 
-    var adminEmail = "admin@admin.com";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
+    var adminEmail = builder.Configuration["Admin:Email"];
+    var adminPassword = builder.Configuration["Admin:Password"];
+    if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
     {
-        var user = new ApplicationUser
+        logger.LogWarning("Admin account was not seeded. Configure Admin:Email and Admin:Password to create it.");
+    }
+    else
+    {
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
         {
-          
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true,
-            FullName = "Muhammad Asad"
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                FullName = builder.Configuration["Admin:FullName"] ?? "Store Administrator"
+            };
 
-        };
-        var result = await userManager.CreateAsync(user, "Admin@123");
-        if (result.Succeeded)
+            var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+            if (!createResult.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Could not create the configured admin account: {string.Join("; ", createResult.Errors.Select(error => error.Description))}");
+            }
+        }
+
+        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
         {
-            await userManager.AddToRoleAsync(user, "Admin");
+            var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+            if (!roleResult.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Could not assign the Admin role: {string.Join("; ", roleResult.Errors.Select(error => error.Description))}");
+            }
         }
     }
 }
