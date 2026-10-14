@@ -18,8 +18,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie expire time
-    options.SlidingExpiration = true; // Har request par expiry renew ho
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.SlidingExpiration = true;
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.LoginPath = "/Identity/Account/Login";
@@ -42,80 +42,64 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
-// Database Migration & Admin Seeding
-using (var scope = app.Services.CreateScope())
+// Safe Database Migration & Admin Seeding with Try-Catch
+try
 {
-    var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
-    
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    var logger = services.GetRequiredService<ILogger<Program>>();
-
-    // Roles create karein
-    var roles = new[] { "Admin", "User" };
-    foreach (var role in roles)
+    using (var scope = app.Services.CreateScope())
     {
-        if (!await roleManager.RoleExistsAsync(role))
+        var services = scope.ServiceProvider;
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
+        
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var logger = services.GetRequiredService<ILogger<Program>>();
+
+        // Roles create karein
+        var roles = new[] { "Admin", "User" };
+        foreach (var role in roles)
         {
-            var roleResult = await roleManager.CreateAsync(new IdentityRole(role));
-            if (!roleResult.Succeeded)
+            if (!await roleManager.RoleExistsAsync(role))
             {
-                throw new InvalidOperationException(
-                    $"Could not create the {role} role: {string.Join("; ", roleResult.Errors.Select(error => error.Description))}");
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        var adminEmail = builder.Configuration["Admin:Email"] ?? "masadkhatri05@gmail.com";
+        var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123";
+
+        if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
+        {
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    FullName = builder.Configuration["Admin:FullName"] ?? "Store Administrator"
+                };
+
+                var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+                if (!createResult.Succeeded)
+                {
+                    logger.LogError("Could not create admin account: {Errors}", string.Join("; ", createResult.Errors.Select(e => e.Description)));
+                }
+            }
+
+            if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
             }
         }
     }
-
-    // Fallback values lagadi hain taake config ya env variables miss hone par bhi yehi email/password use ho
-    var adminEmail = builder.Configuration["Admin:Email"] ?? "masadkhatri05@gmail.com";
-    var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123";
-
-    if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
-    {
-        logger.LogWarning("Admin account was not seeded. Configure Admin:Email and Admin:Password to create it.");
-    }
-    else
-    {
-        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-        if (adminUser == null)
-        {
-            adminUser = new ApplicationUser
-            {
-                UserName = adminEmail,
-                Email = adminEmail,
-                EmailConfirmed = true,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                FullName = builder.Configuration["Admin:FullName"] ?? "Store Administrator"
-            };
-
-            var createResult = await userManager.CreateAsync(adminUser, adminPassword);
-            if (!createResult.Succeeded)
-            {
-                throw new InvalidOperationException(
-                    $"Could not create the configured admin account: {string.Join("; ", createResult.Errors.Select(error => error.Description))}");
-            }
-        }
-        else
-        {
-            // Agar user pehle se mojood hai, toh password aur security stamp fresh update kar dein taake hashing match ho jaye
-            var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
-            await userManager.ResetPasswordAsync(adminUser, token, adminPassword);
-            adminUser.SecurityStamp = Guid.NewGuid().ToString();
-            await userManager.UpdateAsync(adminUser);
-        }
-
-        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-        {
-            var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
-            if (!roleResult.Succeeded)
-            {
-                throw new InvalidOperationException(
-                    $"Could not assign the Admin role: {string.Join("; ", roleResult.Errors.Select(error => error.Description))}");
-            }
-        }
-    }
+}
+catch (Exception ex)
+{
+    var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+    startupLogger.LogError(ex, "An error occurred during database migration or seeding.");
 }
 
 if (!app.Environment.IsDevelopment())
