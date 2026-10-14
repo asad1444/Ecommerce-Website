@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Policy;
 
+[AllowAnonymous]
 public class RegisterModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -34,61 +35,88 @@ public class RegisterModel : PageModel
       
         [Required(ErrorMessage = "Full name is required")]
         [Display(Name = "Full Name")]
-        public string FullName { get; set; }
-        [EmailAddress]
+        public string FullName { get; set; } = string.Empty;
 
-        public string Email { get; set; }
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
+        [Required]
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
-        public string ConfirmPassword { get; set; }
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 
     public async Task OnGetAsync(string returnUrl = null)
     {
-        ReturnUrl = returnUrl ?? Url.Content("~/");
+        ReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
     }
 
     public async Task<IActionResult> OnPostAsync(string returnUrl = null)
     {
-        ReturnUrl = returnUrl ?? Url.Content("~/");
+        ReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-        if (Input == null)
+        if (!ModelState.IsValid || Input == null)
         {
-            ModelState.AddModelError(string.Empty, "Invalid registration data.");
             return Page();
         }
 
-        if (ModelState.IsValid)
+        var user = new ApplicationUser
         {
-            var user = new ApplicationUser { FullName = Input.FullName,UserName = Input.Email, Email = Input.Email };
-            var result = await _userManager.CreateAsync(user, Input.Password);
+            FullName = Input.FullName.Trim(),
+            UserName = Input.Email.Trim(),
+            Email = Input.Email.Trim(),
+            Role = "User"
+        };
+        var result = await _userManager.CreateAsync(user, Input.Password);
 
-            if (result.Succeeded)
+        if (result.Succeeded)
+        {
+            if (!await _roleManager.RoleExistsAsync("User"))
             {
-                // Make sure "User" role exists before assigning
-                // is walay code me agar user exist nahi karta to jo bhi banda login karega to usay user role milayga automatically //
-                if (!await _roleManager.RoleExistsAsync("User"))
+                var createRoleResult = await _roleManager.CreateAsync(new IdentityRole("User"));
+                if (!createRoleResult.Succeeded)
                 {
-                    await _roleManager.CreateAsync(new IdentityRole("User"));
+                    await _userManager.DeleteAsync(user);
+                    foreach (var error in createRoleResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    return Page();
+                }
+            }
+
+            var addToRoleResult = await _userManager.AddToRoleAsync(user, "User");
+            if (!addToRoleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(user);
+                foreach (var error in addToRoleResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-
-                await _userManager.AddToRoleAsync(user, "User");
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToPage("/Account/Login");
+                return Page();
             }
 
-            foreach (var error in result.Errors)
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            if (Url.IsLocalUrl(returnUrl))
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                return LocalRedirect(returnUrl);
             }
+
+            return RedirectToAction("Profile", "User", new { area = "" });
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
         }
 
         return Page();

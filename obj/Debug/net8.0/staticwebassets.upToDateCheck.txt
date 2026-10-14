@@ -618,6 +618,7 @@ wwwroot\CategoryImages\womenshirt.jpg
 wwwroot\css\admin.css
 wwwroot\css\auth.css
 wwwroot\css\site.css
+wwwroot\css\storefront.css
 wwwroot\favicon.ico
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
@@ -885,6 +886,7 @@ wwwroot\templatewebsite\images\slide-07.jpg
 wwwroot\templatewebsite\images\thumb-01.jpg
 wwwroot\templatewebsite\images\thumb-02.jpg
 wwwroot\templatewebsite\images\thumb-03.jpg
+wwwroot\templatewebsite\js\main.js
 wwwroot\templatewebsite\js\map-custom.js
 wwwroot\templatewebsite\js\slick-custom.js
 wwwroot\templatewebsite\vendor\animate\animate.css
@@ -1072,5 +1074,3 @@ wwwroot\template\scss\bootstrap\_type.scss
 wwwroot\template\scss\bootstrap\_utilities.scss
 wwwroot\template\scss\bootstrap\_variables.scss
 wwwroot\template\scss\style.scss
-wwwroot\css\storefront.css
-wwwroot\templatewebsite\js\main.js

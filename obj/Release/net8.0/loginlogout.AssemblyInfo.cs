@@ -11,10 +11,11 @@ using System;
 using System.Reflection;
 
 [assembly: Microsoft.AspNetCore.Identity.UI.UIFrameworkAttribute("Bootstrap5")]
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("10b97091-364f-4ba9-87d7-1f663ce0db8f")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("loginlogout")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b68a81b4d142ebd0a2772d4d45f838ced2f4f4be")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a564c1d964b406ddd7d2b42dc919c8b072c5a8c9")]
 [assembly: System.Reflection.AssemblyProductAttribute("loginlogout")]
 [assembly: System.Reflection.AssemblyTitleAttribute("loginlogout")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

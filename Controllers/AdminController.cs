@@ -113,20 +113,29 @@ namespace loginlogout.Controllers
                     .OrderByDescending(order => order.CreatedAt)
                     .Take(10)
                     .ToListAsync(),
-                TopProducts = await context.OrderItems.AsNoTracking()
-                    .Where(item => periodOrderIds.Contains(item.OrderId))
-                    .GroupBy(item => new { item.ProductId, item.Product.Name })
-                    .Select(group => new AdminTopProductViewModel
-                    {
-                        Name = group.Key.Name,
-                        UnitsSold = group.Sum(item => item.Quantity),
-                        Revenue = group.Sum(item => item.Price * item.Quantity)
-                    })
-                    .OrderByDescending(item => item.UnitsSold)
-                    .Take(5)
-                    .ToListAsync(),
                 SalesTrend = salesTrend
             };
+            var topProductRows = await context.OrderItems.AsNoTracking()
+                    .Where(item => periodOrderIds.Contains(item.OrderId))
+                    .Select(item => new
+                    {
+                        item.ProductId,
+                        Name = item.Product.Name,
+                        item.Quantity,
+                        item.Price
+                    })
+                    .ToListAsync();
+            dashboard.TopProducts = topProductRows
+                .GroupBy(item => new { item.ProductId, item.Name })
+                .Select(group => new AdminTopProductViewModel
+                {
+                    Name = group.Key.Name,
+                    UnitsSold = group.Sum(item => item.Quantity),
+                    Revenue = group.Sum(item => item.Price * item.Quantity)
+                })
+                .OrderByDescending(item => item.UnitsSold)
+                .Take(5)
+                .ToList();
             ViewBag.OrderStatuses = new[] { "pending", "processing", "shipped", "delivered" };
             return View(dashboard);
         }
