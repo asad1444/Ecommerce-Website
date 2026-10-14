@@ -7,9 +7,6 @@
 
 <h1>Search</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -112,9 +109,9 @@
             </td>
             
             <td>
-                <a asp-action="Edit" asp-route-id="@item.OrderId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.OrderId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.OrderId">Delete</a>
+                <a asp-action="EditOrder" asp-route-id="@item.OrderId">Edit</a> |
+                <a asp-action="OrderDetails" asp-route-id="@item.OrderId">Details</a> |
+                <a asp-action="DeleteOrder" asp-route-id="@item.OrderId">Delete</a>
             </td>
         </tr>
 }

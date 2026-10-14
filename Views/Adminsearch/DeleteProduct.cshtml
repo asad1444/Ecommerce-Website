@@ -54,7 +54,7 @@
         </dd>
     </dl>
     
-    <form asp-action="DeleteProduct">
+    <form asp-action="DeleteProduct" method="post">
         <input type="hidden" asp-for="ProductId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
     </form>

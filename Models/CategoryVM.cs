@@ -10,7 +10,7 @@ namespace loginlogout.Models
         public IFormFile? CategoryPhoto { get; set; }
 
         // Navigation
-        public ICollection<Product> Products { get; set; }
+        public ICollection<Product> Products { get; set; } = new List<Product>();
 
     }
 }

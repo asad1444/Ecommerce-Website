@@ -134,6 +134,16 @@ using (var scope = app.Services.CreateScope())
                     $"Unable to create the configured admin account: {string.Join("; ", result.Errors.Select(error => error.Description))}");
             }
         }
+        else if (!await userManager.CheckPasswordAsync(adminUser, adminPassword))
+        {
+            var resetToken = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+            var resetResult = await userManager.ResetPasswordAsync(adminUser, resetToken, adminPassword);
+            if (!resetResult.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Unable to sync the configured admin password: {string.Join("; ", resetResult.Errors.Select(error => error.Description))}");
+            }
+        }
 
         if (adminUser.Role != "Admin")
         {

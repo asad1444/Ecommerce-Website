@@ -91,7 +91,7 @@
 <div class="form-container">
     <h2>Edit Product</h2>
 
-    <form asp-action="Edit" enctype="multipart/form-data">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="ProductId" />
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 

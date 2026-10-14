@@ -74,7 +74,7 @@
         <div class="form-control-static">@Html.DisplayFor(model => model.CategoryImage)</div>
     </div>
 
-    <form asp-action="Delete" method="post">
+    <form asp-action="Delete" asp-route-id="@Model.CategoryId" method="post">
         <input type="hidden" asp-for="CategoryId" />
         <button type="submit" class="btn btn-primary w-100">Delete</button>
     </form>

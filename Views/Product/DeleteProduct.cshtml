@@ -77,7 +77,7 @@
 <div class="form-container">
     <h2>Confirm Delete</h2>
 
-    <form asp-action="DeleteProduct" method="post">
+    <form asp-action="DeleteProduct" asp-route-id="@Model.ProductId" method="post">
         <input type="hidden" asp-for="ProductId" />
 
         <div>

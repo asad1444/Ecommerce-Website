@@ -2,7 +2,7 @@
 using loginlogout.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 
 namespace loginlogout.Controllers
 {
@@ -24,119 +24,147 @@ _context = context;
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddAbout(AboutVM about)
+        public async Task<IActionResult> AddAbout(AboutVM about)
         {
-            string filename = "";
-            string myfilename = "";
-            if(about.UpperPhoto != null)
+            ValidateContent(about);
+            if (about.UpperPhoto == null)
             {
-                string folder = Path.Combine(_env.WebRootPath, "AboutImages");
-                myfilename = about.UpperPhoto.FileName;
-                string filepath = Path.Combine(folder,filename);
-                string filepath2 = Path.Combine(folder, myfilename);
-                about.UpperPhoto.CopyTo(new FileStream(filepath2, FileMode.Create));
-
-
-                About ab = new About()
-                {
-                    UpperImage = myfilename,
-                    Uppertitle = about.Uppertitle,
-                    uppercontent = about.uppercontent,
-
-                };
-
-                _context.About.Add(ab);
-                _context.SaveChanges();
-
-return RedirectToAction("ShowAbout");
-
-
+                ModelState.AddModelError(nameof(about.UpperPhoto), "Choose an image for the About section.");
             }
-            return View();
+            ValidateImage(about.UpperPhoto);
+            if (!ModelState.IsValid)
+            {
+                return View(about);
+            }
+
+            var filename = await SaveImageAsync(about.UpperPhoto!);
+            _context.About.Add(new About
+            {
+                UpperImage = filename,
+                Uppertitle = about.Uppertitle.Trim(),
+                uppercontent = about.uppercontent.Trim()
+            });
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ShowAbout));
         }
 
-        public IActionResult ShowAbout()
+        public async Task<IActionResult> ShowAbout()
         {
-            var show = _context.About.ToList();
+            var show = await _context.About.AsNoTracking().ToListAsync();
             return View(show);
         }
 
         [HttpGet]
-        public IActionResult DeleteAbout(int id)
-
-        { 
-            var findabout = _context.About.Find(id);
-            if(findabout == null)
-            {
-                return NotFound();
-            }
-            return View(findabout);
+        public async Task<IActionResult> DeleteAbout(int id)
+        {
+            var about = await _context.About.FindAsync(id);
+            return about == null ? NotFound() : View(about);
         }
 
         [HttpPost,ActionName("DeleteAbout")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteAbouts(int id)
+        public async Task<IActionResult> DeleteAbouts(int id)
         {
-            var findabout = _context.About.Find(id);
-            if(findabout != null)
+            var about = await _context.About.FindAsync(id);
+            if (about == null)
             {
-                _context.About.Remove(findabout);
-                _context.SaveChanges();
-                return RedirectToAction("ShowAbout");
+                return NotFound();
             }
-            return View(findabout);
+
+            _context.About.Remove(about);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ShowAbout));
         }
 
         [HttpGet]
-        public IActionResult EditAbout(int id)
+        public async Task<IActionResult> EditAbout(int id)
         {
-            var editabout = _context.About.Find(id);
-            if(editabout == null)
+            var about = await _context.About.FindAsync(id);
+            if (about == null)
             {
                 return NotFound();
             }
 
-            AboutVM ab = new AboutVM()
+            ViewBag.BannerImage = about.UpperImage;
+            return View(new AboutVM
             {
-                AboutId = editabout.AboutId,
-                Uppertitle = editabout.Uppertitle,
-
-                uppercontent = editabout.uppercontent,
-
-            };
-            ViewBag.BannerImage = editabout.UpperImage;
-            return View(ab);
+                AboutId = about.AboutId,
+                Uppertitle = about.Uppertitle,
+                uppercontent = about.uppercontent
+            });
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditAbout(AboutVM about)
+        public async Task<IActionResult> EditAbout(AboutVM about)
         {
-            var ab = _context.About.FirstOrDefault(a=> a.AboutId == about.AboutId);
-            if(ab == null)
+            var existing = await _context.About.FindAsync(about.AboutId);
+            if (existing == null)
             {
                 return NotFound();
             }
-            if(about.UpperPhoto != null)
+
+            ValidateContent(about);
+            ValidateImage(about.UpperPhoto);
+            if (!ModelState.IsValid)
             {
-                string folder = Path.Combine(_env.WebRootPath,"AboutImages");
-                string filename2 = about.UpperPhoto.FileName;
-                string filepath2 = Path.Combine(folder,filename2);
-
-                about.UpperPhoto.CopyTo(new FileStream(filepath2, FileMode.Create));
-                ab.UpperImage = filename2;
-
+                ViewBag.BannerImage = existing.UpperImage;
+                return View(about);
             }
-            ab.AboutId = about.AboutId;
-            ab.Uppertitle = about.Uppertitle;
-            ab.uppercontent = about.uppercontent;
-            
-            _context.About.Update(ab);
-            _context.SaveChanges();
-            return RedirectToAction("ShowAbout");
 
+            if (about.UpperPhoto != null)
+            {
+                existing.UpperImage = await SaveImageAsync(about.UpperPhoto);
+            }
+
+            existing.Uppertitle = about.Uppertitle.Trim();
+            existing.uppercontent = about.uppercontent.Trim();
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ShowAbout));
         }
-        
 
-        
+        private void ValidateContent(AboutVM about)
+        {
+            if (string.IsNullOrWhiteSpace(about.Uppertitle))
+            {
+                ModelState.AddModelError(nameof(about.Uppertitle), "Enter a title.");
+            }
+
+            if (string.IsNullOrWhiteSpace(about.uppercontent))
+            {
+                ModelState.AddModelError(nameof(about.uppercontent), "Enter the About content.");
+            }
+        }
+
+        private void ValidateImage(IFormFile? image)
+        {
+            if (image == null)
+            {
+                return;
+            }
+
+            var extension = Path.GetExtension(image.FileName);
+            if (!new[] { ".jpg", ".jpeg", ".png", ".webp" }.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError(nameof(AboutVM.UpperPhoto), "Use a JPG, PNG, or WebP image.");
+            }
+
+            if (image.Length == 0 || image.Length > 5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(nameof(AboutVM.UpperPhoto), "Images must be between 1 byte and 5 MB.");
+            }
+        }
+
+        private async Task<string> SaveImageAsync(IFormFile image)
+        {
+            var folder = Path.Combine(_env.WebRootPath, "AboutImages");
+            Directory.CreateDirectory(folder);
+            var filename = $"{Guid.NewGuid():N}{Path.GetExtension(image.FileName).ToLowerInvariant()}";
+            var path = Path.Combine(folder, filename);
+
+            await using var stream = new FileStream(path, FileMode.CreateNew);
+            await image.CopyToAsync(stream);
+            return filename;
+        }
     }
 }
