@@ -1,9 +1,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+
+# Project file copy karke dependencies restore karein
 COPY loginlogout.csproj ./
 RUN dotnet restore loginlogout.csproj
+
+# Baqi saara source code copy karein
 COPY . ./
-RUN dotnet publish loginlogout.csproj -c Release -o /app/publish --no-restore
+
+# Yahan se --no-restore hata diya hai taake koi caching conflict na ho
+RUN dotnet publish loginlogout.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
