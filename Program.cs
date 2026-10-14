@@ -65,8 +65,8 @@ try
             }
         }
 
-        var adminEmail = builder.Configuration["Admin:Email"] ?? "masadkhatri05@gmail.com";
-        var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123";
+        var adminEmail = builder.Configuration["Admin:Email"];
+        var adminPassword = builder.Configuration["Admin:Password"];
 
         if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
         {
@@ -85,13 +85,19 @@ try
                 var createResult = await userManager.CreateAsync(adminUser, adminPassword);
                 if (!createResult.Succeeded)
                 {
-                    logger.LogError("Could not create admin account: {Errors}", string.Join("; ", createResult.Errors.Select(e => e.Description)));
+                    throw new InvalidOperationException(
+                        $"Could not create the configured admin account: {string.Join("; ", createResult.Errors.Select(error => error.Description))}");
                 }
             }
 
             if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
             {
-                await userManager.AddToRoleAsync(adminUser, "Admin");
+                var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+                if (!roleResult.Succeeded)
+                {
+                    throw new InvalidOperationException(
+                        $"Could not assign the Admin role: {string.Join("; ", roleResult.Errors.Select(error => error.Description))}");
+                }
             }
         }
     }
@@ -100,6 +106,7 @@ catch (Exception ex)
 {
     var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
     startupLogger.LogError(ex, "An error occurred during database migration or seeding.");
+    throw;
 }
 
 if (!app.Environment.IsDevelopment())
