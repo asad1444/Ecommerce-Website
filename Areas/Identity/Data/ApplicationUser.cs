@@ -10,6 +10,7 @@ namespace loginlogout.Areas.Identity.Data;
 public class ApplicationUser : IdentityUser
 {
     public string FullName { get; set; }
+    public string Role { get; set; } = "User";
 
     public ICollection<Order> Orders { get; set; }
     public ICollection<CartItem> CartItems { get; set; }

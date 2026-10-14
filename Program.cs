@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using loginlogout.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -113,6 +113,7 @@ using (var scope = app.Services.CreateScope())
                 UserName = adminEmail,
                 Email = adminEmail,
                 FullName = builder.Configuration["Admin:FullName"] ?? "Admin User",
+                Role = "Admin",
                 EmailConfirmed = true
             };
 
@@ -121,6 +122,17 @@ using (var scope = app.Services.CreateScope())
             {
                 throw new InvalidOperationException(
                     $"Unable to create the configured admin account: {string.Join("; ", result.Errors.Select(error => error.Description))}");
+            }
+        }
+
+        if (adminUser.Role != "Admin")
+        {
+            adminUser.Role = "Admin";
+            var updateResult = await userManager.UpdateAsync(adminUser);
+            if (!updateResult.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    $"Unable to update the configured admin account role: {string.Join("; ", updateResult.Errors.Select(error => error.Description))}");
             }
         }
 
