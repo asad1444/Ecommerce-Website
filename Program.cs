@@ -117,7 +117,7 @@ using (var scope = app.Services.CreateScope())
                 EmailConfirmed = true
             };
 
-            var result = await userManager.CreateAsync(adminUser, adminPassword);
+        var result = await userManager.CreateAsync(adminUser, "Admin@123");
             if (!result.Succeeded)
             {
                 throw new InvalidOperationException(
