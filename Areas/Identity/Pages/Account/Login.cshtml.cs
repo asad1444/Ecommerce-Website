@@ -89,11 +89,11 @@ namespace loginlogout.Areas.Identity.Pages.Account
                 // ye ham ne add kiya 
                 if (await _userManager.IsInRoleAsync(user, "Admin"))
                 {
-                    return RedirectToAction("Dashboard", "Admin");
+                    return RedirectToAction("Dashboard", "Admin", new { area = "" });
                 }
                 else if (await _userManager.IsInRoleAsync(user, "User"))
                 {
-                    return RedirectToAction("Profile", "User");
+                    return RedirectToAction("Profile", "User", new { area = "" });
                 }
                 // yahan tak //
 

@@ -68,7 +68,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Default Fallback values lagadi hain taake config missing hone par bhi admin ban jaye
+    // Fallback values lagadi hain taake config ya env variables miss hone par bhi yehi email/password use ho
     var adminEmail = builder.Configuration["Admin:Email"] ?? "masadkhatri05@gmail.com";
     var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123";
 
@@ -86,6 +86,7 @@ using (var scope = app.Services.CreateScope())
                 UserName = adminEmail,
                 Email = adminEmail,
                 EmailConfirmed = true,
+                SecurityStamp = Guid.NewGuid().ToString(),
                 FullName = builder.Configuration["Admin:FullName"] ?? "Store Administrator"
             };
 
@@ -95,6 +96,14 @@ using (var scope = app.Services.CreateScope())
                 throw new InvalidOperationException(
                     $"Could not create the configured admin account: {string.Join("; ", createResult.Errors.Select(error => error.Description))}");
             }
+        }
+        else
+        {
+            // Agar user pehle se mojood hai, toh password aur security stamp fresh update kar dein taake hashing match ho jaye
+            var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+            await userManager.ResetPasswordAsync(adminUser, token, adminPassword);
+            adminUser.SecurityStamp = Guid.NewGuid().ToString();
+            await userManager.UpdateAsync(adminUser);
         }
 
         if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
