@@ -15,6 +15,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie expire time
@@ -24,7 +25,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Identity/Account/Login";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
-
 
 // Add Identity services
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -42,15 +42,18 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
+// Database Migration & Admin Seeding
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var dbContext = services.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
+    
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var logger = services.GetRequiredService<ILogger<Program>>();
 
+    // Roles create karein
     var roles = new[] { "Admin", "User" };
     foreach (var role in roles)
     {
@@ -65,8 +68,10 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    var adminEmail = builder.Configuration["Admin:Email"];
-    var adminPassword = builder.Configuration["Admin:Password"];
+    // Default Fallback values lagadi hain taake config missing hone par bhi admin ban jaye
+    var adminEmail = builder.Configuration["Admin:Email"] ?? "masadkhatri05@gmail.com";
+    var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin@123";
+
     if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
     {
         logger.LogWarning("Admin account was not seeded. Configure Admin:Email and Admin:Password to create it.");
@@ -103,8 +108,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-    
-
 
 if (!app.Environment.IsDevelopment())
 {
@@ -118,7 +121,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
-
 
 // Routing
 app.MapControllerRoute(name: "default", pattern: "{controller=Admin}/{action=Dashboard}/{id?}");
